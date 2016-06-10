@@ -40,6 +40,12 @@ public class AG {
         }
     }
 
+    public void Fitness (int[][] populacao){
+    
+           for(int j=0;j<50;j++){
+               populacao[j][22]= (-1 + populacao[j][22]) *(3/(2^22-1)); 
+           }
+    }
 public static void main(String[] args) {
         // TODO code application logic here
     int[][] populacao = null; 
