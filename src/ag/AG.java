@@ -19,17 +19,78 @@ public class AG {
         for(int i = 0; i < l; i++)
             Fitness(populacao[i]);
         
-        while(valor_maximo){
+       // while(valor_maximo){
+            int [] popolacao_inter = Torneio(populacao, l, c, 20);
             
             
+            
+       // }
+    }
+    
+    public void GeraFilhos(float [][] populacao, int l, int c, int [] pop_inter, int porcentagem){
+        int count_filhos = 0;
+        int qtd_filhos = (int) ((float)pop_inter.length*((float)porcentagem/100));
+        float [] filho;
+        while(count_filhos<qtd_filhos){
+            int index1;
+            int index2;
+            if(pop_inter.length>1){
+                for(int i = 0; i < 2; i++){
+                    
+                    do{
+                        index1 = (int)(Math.random()*pop_inter.length);
+                        index2 = (int)(Math.random()*pop_inter.length);
+                    }while((index1==index2));
+
+                    filho = Cruzamento(populacao[pop_inter[index1]], populacao[pop_inter[index2]], 70);
+                    if(filho!=null){
+                        
+                    }
+                }
+            }
+            
+            
+            
+            
+            count_filhos++;
         }
     }
     
-    public void Cruzamento(int []indice ){
-        
-        
+    public float [] Cruzamento(float []pai1, float []pai2, int taxa ){
+        int r = (int)(Math.random()*100);
+        if(r<=taxa){
+            float [] filho = new float[pai1.length];
+            for(int i = 0; i < filho.length-1; i++){
+                if(i < (pai1.length/2))
+                    filho[i] = pai1[i];
+                else
+                    filho[i] = pai2[i];
+            }
+            Fitness(filho);
+            return filho;
+        }
+        else
+            return null;
         
     } 
+    
+    public float [] Mutacao(float []pai, int taxa){
+        int r = (int)(Math.random()*100);
+        if(r<=taxa){
+            int indice = (int) (Math.random()*pai.length-2);
+            float [] filho = pai;
+            if(filho[indice]==0)
+                filho[indice]=1;
+            else
+                filho[indice] = 0;
+
+            Fitness(filho);
+            return filho;
+        } 
+        else
+            return null;
+        
+    }
     
     public float [][]  GeraPopulacao(int l, int c){
         float [][] populacao = new float [l][c];
