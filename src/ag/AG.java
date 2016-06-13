@@ -5,6 +5,8 @@
  */
 package ag;
 
+import java.lang.reflect.Array;
+
 /**
  *
  * @author aluno
@@ -26,11 +28,46 @@ public class AG {
             
        // }
     }
+    /**
+     * Retorna a matriz com todos os pais e filhos em apenas uma matriz 
+     * @param populacao
+     * @param l
+     * @param c
+     * @param populacao_gerada
+     * @param linha
+     * @param coluna
+     * @return 
+     */
     
-    public void GeraFilhos(float [][] populacao, int l, int c, int [] pop_inter, int porcentagem){
+    public float[][] agrupar_tabelas(float[][] populacao, int l,int c, float[][]populacao_gerada,int linha,int coluna ){
+       int tamanho_linha=l+linha;
+       int indice=0;
+       float [][] populacao_total=new float[tamanho_linha][c];
+       
+       for(int i=0;i<l;i++){
+           for(int j=0;j<c;c++){
+               populacao_total[j][c]=populacao[i][j];
+           
+           }
+       }
+       for(int i=l-1;i<tamanho_linha;i++){
+           for(int j=0;j<coluna;j++){
+               populacao_total[i][j]= populacao_gerada[indice][j];
+           }
+           
+       }
+        
+       return populacao_total;
+    }
+    public float [][] GeraFilhos(float [][] populacao, int l, int c, int [] pop_inter, int porcentagem){
         int count_filhos = 0;
         int qtd_filhos = (int) ((float)pop_inter.length*((float)porcentagem/100));
         float [] filho;
+        //a matriz população para uma nova matriz com a quantidade de tamanho da populacao gera (país e filhos gerados)
+        float [][] populacao_gerada=new float [14][23];
+        
+        int indice=0;
+        
         while(count_filhos<qtd_filhos){
             int index1;
             int index2;
@@ -43,8 +80,14 @@ public class AG {
                     }while((index1==index2));
 
                     filho = Cruzamento(populacao[pop_inter[index1]], populacao[pop_inter[index2]], 70);
+                    // copia o filho gerado para a matriz populacao gerada, que contém apenas os gilhos gerados
                     if(filho!=null){
-                        
+                        System.arraycopy(filho, 0, populacao_gerada[indice], 0, filho.length);
+                        indice++;
+                      
+                    }
+                    else if(filho== null){
+                        System.out.println("Filho com o resultado null");
                     }
                 }
             }
@@ -54,6 +97,7 @@ public class AG {
             
             count_filhos++;
         }
+        return populacao_gerada;
     }
     
     public float [] Cruzamento(float []pai1, float []pai2, int taxa ){
