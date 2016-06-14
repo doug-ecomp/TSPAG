@@ -204,6 +204,12 @@ public class AG {
         return false;
     }
     
+    public double calcularDistancia(double cidade1_x,double cidade1_y, double cidade2_x,double cidade2_y){
+             double distancia = Math.sqrt( Math.pow( (cidade1_x - cidade2_x),2 ) +
+                               Math.pow( (cidade1_y - cidade2_y),2 ) );
+             return distancia;
+    
+    }
     
     public static void main(String[] args) {
         // TODO code application logic here
