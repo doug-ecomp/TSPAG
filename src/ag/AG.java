@@ -229,10 +229,15 @@ public class AG {
             return fit;
     }
 
-    public void Fitness (float[] cromossomo){
-       
-        cromossomo[cromossomo.length-1]= -1.0f + (ConvertDec(cromossomo) * 3.0f/4194303f) ;
-         
+    public float Fitness (int [] cromossomo, float [][] matriz_adj){
+        float fitness = 0;
+        for (int i = 0; i < cromossomo.length-1; i++) {
+            fitness = fitness + matriz_adj[cromossomo[i]][cromossomo[i+1]];
+        }
+        
+        fitness = fitness + matriz_adj[cromossomo[cromossomo.length-1]][cromossomo[0]];
+        
+        return fitness;
     }
     
     public int[] Torneio(float [][] populacao, int l, int c, int size){
@@ -277,9 +282,15 @@ public class AG {
     
     public static void main(String[] args) {
 //        // TODO code application logic here
-        int [] pai1 = {0, 1, 2, 3, 4, 5};
+        float [][] matriz_adj = {{0f, 0.2f, 0.3f, 0.4f},
+                                 {0.2f, 0f, 0.7f, 1.2f},
+                                 {0.3f, 0.7f, 0f, 0.8f},
+                                 {0.4f, 1.2f, 0.8f, 0f  }};
+        
+        int [] pai1 = {1, 3, 2,0};
         int [] pai2 = {3, 2, 5, 0, 4, 1};
-        (new AG()).Cruzamento(pai1, pai2, 100);
+        float aux = (new AG()).Fitness(pai1, matriz_adj);
+        System.out.println(aux);
 //        (new AG()).run(50, 23);
 //        char a[] = new char[1];
 //        int b = a[0];
