@@ -103,13 +103,14 @@ public class AG {
         return populacao_gerada;
     }
     
-    public char [] Cruzamento(char []pai1, char []pai2, int taxa ){
+    public int [] Cruzamento(int []pai1, int []pai2, int taxa ){
         int r = (new Random()).nextInt(taxa+1);
         
         if(r<=taxa){
-            char [] filho = new char[pai1.length];
+            int [] filho = new int[pai1.length];
+            Arrays.fill(filho, -1);
             
-            char [] genes_do_pai1 = new char [pai1.length/2];
+            int [] genes_do_pai1 = new int [pai1.length/2];
             int [] indices_genes_pai1 = new int [pai1.length/2];
             int [] indices_no_pai2 = new int[pai1.length/2];
             for (int i = 0; i < genes_do_pai1.length; i++) {
@@ -122,7 +123,7 @@ public class AG {
             }
             
             int j, ii, x;//insertion sort
-            char y;
+            int y;
             for ( j = 1; j < indices_genes_pai1.length; j++) 
             {
                  x = indices_genes_pai1[j];
@@ -148,17 +149,17 @@ public class AG {
                 filho[indices_no_pai2[i]] = genes_do_pai1[i];
             }
             
-            for(char gene: filho)
+            for(int gene: filho)
                 System.out.print(gene+" ");
             System.out.println("");
             
             for(int i = 0; i < pai2.length; i++){
                 if(BuscaElemento(filho, pai2[i])==-1){
-                    int aux2 = BuscaElemento(filho, '\u0000');
+                    int aux2 = BuscaElemento(filho, -1);
                     filho[aux2] = pai2[i];
                 }
             }
-            for(char gene: filho)
+            for(int gene: filho)
                 System.out.print(gene+" ");
             //Fitness(filho);
             return filho;
@@ -168,7 +169,7 @@ public class AG {
         
     } 
     
-    public char [] Mutacao(char []pai, int taxa){
+    public int [] Mutacao(int []pai, int taxa){
         int r = (new Random()).nextInt(taxa+1);
         if(r<=taxa){
             int indice1;
@@ -178,8 +179,8 @@ public class AG {
                 indice2 = (new Random()).nextInt(pai.length);
             }while(indice1==indice2);
             
-            char [] filho = pai;
-            char aux = filho[indice1];
+            int [] filho = pai;
+            int aux = filho[indice1];
             filho[indice1] = filho[indice2];
             filho[indice2] = aux;
 
@@ -191,7 +192,7 @@ public class AG {
         
     }
     
-    public int BuscaElemento(char [] cromossomo, char gene){
+    public int BuscaElemento(int [] cromossomo, int gene){
         for(int i = 0; i < cromossomo.length; i++){
             if(cromossomo[i]==gene)
                 return i;
@@ -276,10 +277,10 @@ public class AG {
     
     public static void main(String[] args) {
 //        // TODO code application logic here
-//        char [] pai1 = {'a', 'b', 'c', 'd', 'e', 'f'};
-//        char [] pai2 = {'d', 'c', 'f','a', 'e', 'b'};
-//        (new AG()).Cruzamento(pai1, pai2, 100);
-        (new AG()).run(50, 23);
+        int [] pai1 = {0, 1, 2, 3, 4, 5};
+        int [] pai2 = {3, 2, 5, 0, 4, 1};
+        (new AG()).Cruzamento(pai1, pai2, 100);
+//        (new AG()).run(50, 23);
 //        char a[] = new char[1];
 //        int b = a[0];
 //        System.out.println(b);
