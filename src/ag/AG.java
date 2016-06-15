@@ -6,6 +6,9 @@
 package ag;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 /**
  *
@@ -100,17 +103,64 @@ public class AG {
         return populacao_gerada;
     }
     
-    public float [] Cruzamento(float []pai1, float []pai2, int taxa ){
-        int r = (int)(Math.random()*100);
+    public char [] Cruzamento(char []pai1, char []pai2, int taxa ){
+        int r = (new Random()).nextInt(taxa+1);
+        
         if(r<=taxa){
-            float [] filho = new float[pai1.length];
-            for(int i = 0; i < filho.length-1; i++){
-                if(i < (pai1.length/2))
-                    filho[i] = pai1[i];
-                else
-                    filho[i] = pai2[i];
+            char [] filho = new char[pai1.length];
+            
+            char [] genes_do_pai1 = new char [pai1.length/2];
+            int [] indices_genes_pai1 = new int [pai1.length/2];
+            int [] indices_no_pai2 = new int[pai1.length/2];
+            for (int i = 0; i < genes_do_pai1.length; i++) {
+                int aux1;
+                do{
+                    aux1 = (new Random()).nextInt(pai1.length);
+                }while(BuscaElemento(genes_do_pai1, pai1[aux1])!=-1);
+                genes_do_pai1[i] = pai1[aux1];
+                indices_genes_pai1[i] = aux1;
             }
-            Fitness(filho);
+            
+            int j, ii, x;//insertion sort
+            char y;
+            for ( j = 1; j < indices_genes_pai1.length; j++) 
+            {
+                 x = indices_genes_pai1[j];
+                 y = genes_do_pai1[j];
+                 ii = j-1;
+                 while(ii >= 0 && indices_genes_pai1[ii] > x )
+                 {
+                         indices_genes_pai1[ii+1] = indices_genes_pai1[ii];
+                         genes_do_pai1[ii+1] = genes_do_pai1[ii];
+                         ii--;
+                 }
+                 indices_genes_pai1[ii + 1] = x;
+                 genes_do_pai1[ii + 1] = y;
+            }
+            
+            for (int i = 0; i < genes_do_pai1.length; i++) {
+                indices_no_pai2[i] = BuscaElemento(pai2, genes_do_pai1[i]);
+            }
+            
+            Arrays.sort(indices_no_pai2);
+            
+            for (int i = 0; i < genes_do_pai1.length; i++) {
+                filho[indices_no_pai2[i]] = genes_do_pai1[i];
+            }
+            
+            for(char gene: filho)
+                System.out.print(gene+" ");
+            System.out.println("");
+            
+            for(int i = 0; i < pai2.length; i++){
+                if(BuscaElemento(filho, pai2[i])==-1){
+                    int aux2 = BuscaElemento(filho, '\u0000');
+                    filho[aux2] = pai2[i];
+                }
+            }
+            for(char gene: filho)
+                System.out.print(gene+" ");
+            //Fitness(filho);
             return filho;
         }
         else
@@ -118,23 +168,36 @@ public class AG {
         
     } 
     
-    public float [] Mutacao(float []pai, int taxa){
-        int r = (int)(Math.random()*100);
+    public char [] Mutacao(char []pai, int taxa){
+        int r = (new Random()).nextInt(taxa+1);
         if(r<=taxa){
-            int indice = (int) (Math.random()*pai.length-2);
-            float [] filho = pai;
-            if(filho[indice]==0)
-                filho[indice]=1;
-            else
-                filho[indice] = 0;
+            int indice1;
+            int indice2;
+            do{
+                indice1 = (new Random()).nextInt(pai.length);
+                indice2 = (new Random()).nextInt(pai.length);
+            }while(indice1==indice2);
+            
+            char [] filho = pai;
+            char aux = filho[indice1];
+            filho[indice1] = filho[indice2];
+            filho[indice2] = aux;
 
-            Fitness(filho);
+            //Fitness(filho);
             return filho;
         } 
         else
             return null;
         
     }
+    
+    public int BuscaElemento(char [] cromossomo, char gene){
+        for(int i = 0; i < cromossomo.length; i++){
+            if(cromossomo[i]==gene)
+                return i;
+        }
+        return -1;
+    } 
     
     public float [][]  GeraPopulacao(int l, int c){
         float [][] populacao = new float [l][c];
@@ -206,9 +269,16 @@ public class AG {
     
     
     public static void main(String[] args) {
-        // TODO code application logic here
-        
-        (new AG()).run(50, 23);
+//        // TODO code application logic here
+//        char [] pai1 = {'a', 'b', 'c', 'd', 'e', 'f'};
+//        char [] pai2 = {'d', 'c', 'f','a', 'e', 'b'};
+//        (new AG()).Cruzamento(pai1, pai2, 100);
+//        (new AG()).run(50, 23);
+//        char a[] = new char[1];
+//        int b = a[0];
+//        System.out.println(b);
+//        if(a[0]=='\u0000')
+//            System.out.println(true);
         
     }
 
