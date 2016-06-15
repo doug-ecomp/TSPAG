@@ -82,16 +82,16 @@ public class AG {
                         index2 = (int)(Math.random()*pop_inter.length);
                     }while((index1==index2));
 
-                    filho = Cruzamento(populacao[pop_inter[index1]], populacao[pop_inter[index2]], 70);
-                    // copia o filho gerado para a matriz populacao gerada, que contém apenas os gilhos gerados
-                    if(filho!=null){
-                        System.arraycopy(filho, 0, populacao_gerada[indice], 0, filho.length);
-                        indice++;
-                      
-                    }
-                    else if(filho== null){
-                        System.out.println("Filho com o resultado null");
-                    }
+//                    filho = Cruzamento(populacao[pop_inter[index1]], populacao[pop_inter[index2]], 70);
+//                    // copia o filho gerado para a matriz populacao gerada, que contém apenas os gilhos gerados
+//                    if(filho!=null){
+//                        System.arraycopy(filho, 0, populacao_gerada[indice], 0, filho.length);
+//                        indice++;
+//                      
+//                    }
+//                    else if(filho== null){
+//                        System.out.println("Filho com o resultado null");
+//                    }
                 }
             }
             
@@ -273,7 +273,7 @@ public class AG {
 //        char [] pai1 = {'a', 'b', 'c', 'd', 'e', 'f'};
 //        char [] pai2 = {'d', 'c', 'f','a', 'e', 'b'};
 //        (new AG()).Cruzamento(pai1, pai2, 100);
-//        (new AG()).run(50, 23);
+        (new AG()).run(50, 23);
 //        char a[] = new char[1];
 //        int b = a[0];
 //        System.out.println(b);
