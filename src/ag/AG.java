@@ -16,16 +16,27 @@ import java.util.Random;
  */
 public class AG {
     
+    private final float [][] matriz_adj;
+    private float [] fitness_values;
+    private int [][] populacao;
     
-    public void run(int l, int c){
-        float[][] populacao = null; 
-        populacao = GeraPopulacao(l, c);
+    public AG(int pop_size, int city_amount){
+        matriz_adj = new float [pop_size][pop_size];
+        fitness_values = new float [pop_size];
+        Arrays.fill(matriz_adj, 0);
+        Arrays.fill(fitness_values, -1);
+        populacao = GeraPopulacao(pop_size, city_amount);
+    }
+    
+    
+    public void run(int pop_size, int city_amount){
+        
         boolean valor_maximo = false;
-        for(int i = 0; i < l; i++)
-            Fitness(populacao[i]);
+        for(int i = 0; i < pop_size; i++)
+            Fitness(populacao[i], matriz_adj);
         
        // while(valor_maximo){
-            int [] popolacao_inter = Torneio(populacao, l, c, 20);
+            int [] popolacao_inter = Torneio(fitness_values, pop_size,  20);
             
             
             
@@ -200,35 +211,21 @@ public class AG {
         return -1;
     } 
     
-    public float [][]  GeraPopulacao(int l, int c){
-        float [][] populacao = new float [l][c];
-        for (int j=0;j<=l-1;j++){
-            for(int i = 0; i<=c-2; i++){
-                int a=(int) (1+Math.random()*2);
-                if(a==1){
-                    populacao[j][i]=1;
-                }
-                else if(a==2){
-                    populacao[j][i]=0;
-                }
-
+    public int [][]  GeraPopulacao(int pop_size, int city_amount){
+        int [][] population = new int [pop_size][city_amount];
+        Arrays.fill(population, -1);
+        for (int j=0; j < pop_size; j++){
+            for(int i = 0; i < city_amount; i++){
+                int gene;
+                do{
+                    gene=(new Random()).nextInt(city_amount);
+                } while(BuscaElemento(population[j], gene)!=-1);
+                population[j][i] = gene;
             }
         }
-    
-    return populacao;
+        return population;
     }
     
-    
-    public float ConvertDec(float[] cromossomo){
-        float fit = 0;
-            for(int i = cromossomo.length-2; i>=0; i--){
-                int exp = (cromossomo.length-2)-i;
-                fit = (float)fit + ((float)cromossomo[i]*(float)(Math.pow(2, exp)));
-            }
-            
-            return fit;
-    }
-
     public float Fitness (int [] cromossomo, float [][] matriz_adj){
         float fitness = 0;
         for (int i = 0; i < cromossomo.length-1; i++) {
@@ -240,37 +237,29 @@ public class AG {
         return fitness;
     }
     
-    public int[] Torneio(float [][] populacao, int l, int c, int size){
+    public int[] Torneio(float [] fitness, int pop_size, int size){
         int [] indice = new int [size];
+        Arrays.fill(indice, -1);
         int count = 0;
         int index;
         while (count<size){
             int a1;
             int a2;
             do{
-                a1=(int) (Math.random()*(l-1));
-                a2=(int) (Math.random()*(l-1));
+                a1=(new Random()).nextInt(pop_size);
+                a2=(new Random()).nextInt(pop_size);
             }while(a2==a1);
             
-            if(populacao[a1][c-1]>populacao[a2][c-1])
+            if(fitness[a1]>fitness[a2])
                 index = a1;
             else
                 index = a2;
-            if(!Check(indice, count, index)){
+            if(BuscaElemento(indice, index)==-1){
                 indice[count] = index;
                 count++;
             }
         }
         return indice;
-    }
-    
-    public boolean Check(int [] vector, int count, int indice){
-        for(int i = 0; i < count; i++){
-            if(vector[i]==indice)
-                return true;
-        }
-        
-        return false;
     }
     
     public double calcularDistancia(double cidade1_x,double cidade1_y, double cidade2_x,double cidade2_y){
@@ -282,15 +271,14 @@ public class AG {
     
     public static void main(String[] args) {
 //        // TODO code application logic here
-        float [][] matriz_adj = {{0f, 0.2f, 0.3f, 0.4f},
-                                 {0.2f, 0f, 0.7f, 1.2f},
-                                 {0.3f, 0.7f, 0f, 0.8f},
-                                 {0.4f, 1.2f, 0.8f, 0f  }};
+//        float [][] matriz_adj = {{0f, 0.2f, 0.3f, 0.4f},
+//                                 {0.2f, 0f, 0.7f, 1.2f},
+//                                 {0.3f, 0.7f, 0f, 0.8f},
+//                                 {0.4f, 1.2f, 0.8f, 0f  }};
         
         int [] pai1 = {1, 3, 2,0};
         int [] pai2 = {3, 2, 5, 0, 4, 1};
-        float aux = (new AG()).Fitness(pai1, matriz_adj);
-        System.out.println(aux);
+//        float aux = (new AG()).Fitness(pai1, matriz_adj);
 //        (new AG()).run(50, 23);
 //        char a[] = new char[1];
 //        int b = a[0];
