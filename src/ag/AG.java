@@ -6,6 +6,8 @@
 package ag;
 
 import java.lang.reflect.Array;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -16,24 +18,41 @@ import java.util.Random;
  */
 public class AG {
     
-    private final float [][] matriz_adj;
+    private float [][] matriz_adj = {{0f, 0.2f, 0.3f, 0.4f},
+                                    {0.2f, 0f, 0.7f, 1.2f},
+                                    {0.3f, 0.7f, 0f, 0.8f},
+                                    {0.4f, 1.2f, 0.8f, 0f}};
     private float [] fitness_values;
     private int [][] populacao;
+    private final int geracoes = 10;
+    private int solucao_otima; //Indice da melhor solucao. Atualizado em cada geração;
+    
+    private DecimalFormat df;
+    private DecimalFormatSymbols symbols;
     
     public AG(int pop_size, int city_amount){
-        matriz_adj = new float [pop_size][pop_size];
+        
+        symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator('.');
+        df = new DecimalFormat();
+	df.setMaximumFractionDigits(4);
+	df.setMinimumFractionDigits(4);
+        df.setDecimalFormatSymbols(symbols);
+        
         fitness_values = new float [pop_size];
-        Arrays.fill(matriz_adj, 0);
         Arrays.fill(fitness_values, -1);
         populacao = GeraPopulacao(pop_size, city_amount);
+        solucao_otima = 0;
+        
     }
+    
     
     
     public void run(int pop_size, int city_amount){
         
         boolean valor_maximo = false;
         for(int i = 0; i < pop_size; i++)
-            Fitness(populacao[i], matriz_adj);
+            Fitness(populacao[i]);
         
        // while(valor_maximo){
             int [] popolacao_inter = Torneio(fitness_values, pop_size,  20);
@@ -73,8 +92,8 @@ public class AG {
         
        return populacao_total;
     }
-    public float [][] GeraFilhos(float [][] populacao, int l, int c, int [] pop_inter, int porcentagem){
-        int count_filhos = 0;
+    
+    public float [][] Reproduzir(float [][] populacao, int l, int c, int [] pop_inter, int porcentagem){
         int qtd_filhos = (int) ((float)pop_inter.length*((float)porcentagem/100));
         float [] filho;
         //a matriz população para uma nova matriz com a quantidade de tamanho da populacao gera (país e filhos gerados)
@@ -82,7 +101,7 @@ public class AG {
         
         int indice=0;
         
-        while(count_filhos<qtd_filhos){
+        while(qtd_filhos>0){
             int index1;
             int index2;
             if(pop_inter.length>1){
@@ -109,7 +128,7 @@ public class AG {
             
             
             
-            count_filhos++;
+            qtd_filhos--;
         }
         return populacao_gerada;
     }
@@ -213,7 +232,9 @@ public class AG {
     
     public int [][]  GeraPopulacao(int pop_size, int city_amount){
         int [][] population = new int [pop_size][city_amount];
-        Arrays.fill(population, -1);
+        for(int [] cromossomo:population)
+            Arrays.fill(cromossomo, -1);
+        
         for (int j=0; j < pop_size; j++){
             for(int i = 0; i < city_amount; i++){
                 int gene;
@@ -221,19 +242,28 @@ public class AG {
                     gene=(new Random()).nextInt(city_amount);
                 } while(BuscaElemento(population[j], gene)!=-1);
                 population[j][i] = gene;
+                System.out.print(gene+" ");
             }
+            fitness_values[j] = Fitness(population[j]);
+            System.out.print(j+" fit: "+fitness_values[j]+"   ");
+            if(fitness_values[j]>fitness_values[solucao_otima]){
+                solucao_otima = j;
+                System.out.print(j+" ");
+            }
+            System.out.println("soluc ot: "+solucao_otima);
         }
         return population;
     }
     
-    public float Fitness (int [] cromossomo, float [][] matriz_adj){
-        float fitness = 0;
+    public float Fitness (int [] cromossomo){
+        float fitness = 0f;
         for (int i = 0; i < cromossomo.length-1; i++) {
             fitness = fitness + matriz_adj[cromossomo[i]][cromossomo[i+1]];
+            fitness = Float.parseFloat(df.format(fitness)); //Deixar no formato .00 (duas casas decimais
         }
         
         fitness = fitness + matriz_adj[cromossomo[cromossomo.length-1]][cromossomo[0]];
-        
+        fitness = Float.parseFloat(df.format(fitness)); //Deixar no formato .00 (duas casas decimais
         return fitness;
     }
     
@@ -271,11 +301,9 @@ public class AG {
     
     public static void main(String[] args) {
 //        // TODO code application logic here
-//        float [][] matriz_adj = {{0f, 0.2f, 0.3f, 0.4f},
-//                                 {0.2f, 0f, 0.7f, 1.2f},
-//                                 {0.3f, 0.7f, 0f, 0.8f},
-//                                 {0.4f, 1.2f, 0.8f, 0f  }};
         
+        AG genetic;
+        genetic = new AG(10,4);
         int [] pai1 = {1, 3, 2,0};
         int [] pai2 = {3, 2, 5, 0, 4, 1};
 //        float aux = (new AG()).Fitness(pai1, matriz_adj);
