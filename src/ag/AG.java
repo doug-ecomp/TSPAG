@@ -262,12 +262,44 @@ public class AG {
         return indice;
     }
     
-    public double calcularDistancia(double cidade1_x,double cidade1_y, double cidade2_x,double cidade2_y){
-             double distancia = Math.sqrt( Math.pow( (cidade1_x - cidade2_x),2 ) +
+    public float calcularDistancia(float cidade1_x,float cidade1_y, float cidade2_x,float cidade2_y){
+             float distancia =(float) Math.sqrt( Math.pow( (cidade1_x - cidade2_x),2 ) +
                                Math.pow( (cidade1_y - cidade2_y),2 ) );
              return distancia;
     
     }
+    /**
+     * Função que retorna a matriz de adjacência recebendo o um arrayList de cromossomo onde 
+     * cada genes faz é uma cidade com as coordenadas X e Y,vindas do arquivo de leitura.
+     *  
+     * @param cromossomo contém todas as cidades 
+     * @param l tamanho da matriz adjacência que no caso vai ser 14 que é quantidade de cidade logo linha recebe 14
+     * @param c tamanho da matriz adjacência que no caso vai ser 14 que é quantidade de cidade logo coluna recebe 14
+     * @return o retorno é a matriz adjacência com todos as distancias de uma cidade para outra. 
+     */
+   public float [][]matrizAdjacencia (ArrayList cromossomo,int l, int c){
+       float [][] matriz = new float [l][c];
+       // percorrendo a matriz e armazenando as distância 
+       for(int linha=0;linha<l ;linha++){
+       for(int coluna=0;coluna<c;coluna++){
+           //zerando a diagonal principal 
+           if(linha==coluna){
+               matriz[linha][coluna]=0;
+           }
+           else{
+               // faz o cash do objeto recebido da lista e percorrer passando para a função calcular
+               // a dist^ncia entre as cidades. 
+               Cromossomo gene_1=(Cromossomo)cromossomo.get(linha);
+               Cromossomo gene_2=(Cromossomo)cromossomo.get(coluna);
+               float numero =calcularDistancia(gene_1.getX(),gene_1.getY(),gene_2.getX(),gene_2.getY());
+               // caso dê algum número negativo. 
+               matriz[linha][coluna]=Math.abs(numero);
+           }
+       }
+   }
+       return matriz;
+  }
+   
     
     public static void main(String[] args) {
 //        // TODO code application logic here
