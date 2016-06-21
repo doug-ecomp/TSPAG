@@ -55,7 +55,7 @@ public class AG {
             Fitness(populacao[i]);
         
        // while(valor_maximo){
-            int [] popolacao_inter = Torneio(fitness_values, pop_size,  20);
+            int [] popolacao_inter = Torneio(pop_size,  20);
             
             
             
@@ -267,7 +267,10 @@ public class AG {
         return fitness;
     }
     
-    public int[] Torneio(float [] fitness, int pop_size, int size){
+    public int[] Torneio( int pop_size, int size){
+        if(size%2!=0)
+            size--;
+        
         int [] indice = new int [size];
         Arrays.fill(indice, -1);
         int count = 0;
@@ -280,7 +283,7 @@ public class AG {
                 a2=(new Random()).nextInt(pop_size);
             }while(a2==a1);
             
-            if(fitness[a1]>fitness[a2])
+            if(fitness_values[a1]>fitness_values[a2])
                 index = a1;
             else
                 index = a2;
