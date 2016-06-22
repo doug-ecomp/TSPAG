@@ -26,11 +26,14 @@ public class AG {
     private int [][] populacao;
     private final int geracoes = 10;
     private int solucao_otima; //Indice da melhor solucao. Atualizado em cada geração;
-    
+    private int pop_size;
+    private int city_amount;
     private DecimalFormat df;
     private DecimalFormatSymbols symbols;
     
     public AG(int pop_size, int city_amount){
+        this.pop_size = pop_size;
+        this.city_amount = city_amount;
         
         symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
@@ -41,21 +44,21 @@ public class AG {
         
         fitness_values = new float [pop_size];
         Arrays.fill(fitness_values, -1);
-        populacao = GeraPopulacao(pop_size, city_amount);
+        populacao = GeraPopulacao();
         solucao_otima = 0;
         
     }
     
     
     
-    public void run(int pop_size, int city_amount){
+    public void run(){
         
         boolean valor_maximo = false;
         for(int i = 0; i < pop_size; i++)
             Fitness(populacao[i]);
         
        // while(valor_maximo){
-            int [] popolacao_inter = Torneio(pop_size,  20);
+            int [] popolacao_inter = Torneio(20);
             
             
             
@@ -230,7 +233,7 @@ public class AG {
         return -1;
     } 
     
-    public int [][]  GeraPopulacao(int pop_size, int city_amount){
+    public int [][]  GeraPopulacao(){
         int [][] population = new int [pop_size][city_amount];
         for(int [] cromossomo:population)
             Arrays.fill(cromossomo, -1);
@@ -267,7 +270,8 @@ public class AG {
         return fitness;
     }
     
-    public int[] Torneio( int pop_size, int size){
+    public int[] Torneio(int size){
+        size = (int) (pop_size*( (float)(size/100) ) );
         if(size%2!=0)
             size--;
         
