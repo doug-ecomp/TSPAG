@@ -18,16 +18,25 @@ import java.util.Random;
  */
 public class AG {
     
+    public static final int taxa_cruzamento =  70;
+    public static final int taxa_mutacao =  5;
+    public static final int taxa_elitismo =  5;
+    public static final int taxa_selecao = 40;
+    public static final int qtd_geracoes = 10;
+    
+    
     private float [][] matriz_adj = {{0f, 0.2f, 0.3f, 0.4f},
                                     {0.2f, 0f, 0.7f, 1.2f},
                                     {0.3f, 0.7f, 0f, 0.8f},
                                     {0.4f, 1.2f, 0.8f, 0f}};
     private float [] fitness_values;
     private int [][] populacao;
+    private ArrayList <Integer> elite;
     private final int geracoes = 10;
     private int solucao_otima; //Indice da melhor solucao. Atualizado em cada geração;
     private int pop_size;
     private int city_amount;
+    
     private DecimalFormat df;
     private DecimalFormatSymbols symbols;
     
@@ -38,12 +47,14 @@ public class AG {
         symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
         df = new DecimalFormat();
-	df.setMaximumFractionDigits(4);
-	df.setMinimumFractionDigits(4);
+	df.setMaximumFractionDigits(2);
+	df.setMinimumFractionDigits(2);
         df.setDecimalFormatSymbols(symbols);
         
         fitness_values = new float [pop_size];
         Arrays.fill(fitness_values, -1);
+        elite = new ArrayList<>();
+        
         populacao = GeraPopulacao();
         solucao_otima = 0;
         
@@ -52,94 +63,79 @@ public class AG {
     
     
     public void run(){
+        int geracao = 0;
         
-        boolean valor_maximo = false;
-        for(int i = 0; i < pop_size; i++)
-            Fitness(populacao[i]);
-        
-       // while(valor_maximo){
-            int [] popolacao_inter = Torneio(20);
+        while(geracao<qtd_geracoes){
+            int [] popolacao_inter = Torneio();
+            ArrayList<int []> filhos =  Reproduzir(popolacao_inter);
             
             
             
-       // }
-    }
-    /**
-     * Retorna a matriz com todos os pais e filhos em apenas uma matriz 
-     * @param populacao
-     * @param l
-     * @param c
-     * @param populacao_gerada
-     * @param linha
-     * @param coluna
-     * @return 
-     */
-    
-    public float[][] agrupar_tabelas(float[][] populacao, int l,int c, float[][]populacao_gerada,int linha,int coluna ){
-       int tamanho_linha=l+linha;
-       int indice=0;
-       float [][] populacao_total=new float[tamanho_linha][c];
-       
-       for(int i=0;i<l;i++){
-           for(int j=0;j<c;c++){
-               populacao_total[j][c]=populacao[i][j];
-           
-           }
        }
-       for(int i=l-1;i<tamanho_linha;i++){
-           for(int j=0;j<coluna;j++){
-               populacao_total[i][j]= populacao_gerada[indice][j];
-           }
-           
-       }
-        
-       return populacao_total;
     }
     
-    public float [][] Reproduzir(float [][] populacao, int l, int c, int [] pop_inter, int porcentagem){
-        int qtd_filhos = (int) ((float)pop_inter.length*((float)porcentagem/100));
-        float [] filho;
+    
+    public void Substituicao(ArrayList<int []> populacao_gerada){
+        int indice;
+        for(int [] filho: populacao_gerada){
+            do{
+                indice = (new Random()).nextInt(pop_size);
+            } while(elite.contains(indice));
+            populacao[indice] = filho;
+            float fitness = Fitness(filho);
+            fitness_values[indice] = fitness;
+            AtualizaElite(indice, fitness);
+        }
+        
+        
+    }
+    public void AtualizaElite(int indice, float fitness){
+        for (int i = 0; i < elite.size(); i++) {
+            if(fitness>fitness_values[elite.get(i)]){
+                elite.remove(i);
+                elite.add(i, indice);
+                break;
+            }  
+        }
+        
+        
+    }
+    public ArrayList<int []> Reproduzir(int [] pop_inter){
+        int [] filho;
+        int qtd_filhos;
         //a matriz população para uma nova matriz com a quantidade de tamanho da populacao gera (país e filhos gerados)
-        float [][] populacao_gerada=new float [14][23];
+        ArrayList<int []> populacao_gerada = new ArrayList<>();
         
         int indice=0;
         
-        while(qtd_filhos>0){
-            int index1;
-            int index2;
-            if(pop_inter.length>1){
-                for(int i = 0; i < 2; i++){
-                    
-                    do{
-                        index1 = (int)(Math.random()*pop_inter.length);
-                        index2 = (int)(Math.random()*pop_inter.length);
-                    }while((index1==index2));
+        do{
+            for(int i = 0, j = pop_inter.length-1; i < pop_inter.length/2; i++, j--){
 
-//                    filho = Cruzamento(populacao[pop_inter[index1]], populacao[pop_inter[index2]], 70);
-//                    // copia o filho gerado para a matriz populacao gerada, que contém apenas os gilhos gerados
-//                    if(filho!=null){
-//                        System.arraycopy(filho, 0, populacao_gerada[indice], 0, filho.length);
-//                        indice++;
-//                      
-//                    }
-//                    else if(filho== null){
-//                        System.out.println("Filho com o resultado null");
-//                    }
+                filho = Cruzamento(populacao[pop_inter[i]], populacao[pop_inter[j]]);
+                if(filho!=null){
+                    populacao_gerada.add(filho);
+                }
+                else {
+                    System.out.println("Filho com o resultado null");
                 }
             }
-            
-            
-            
-            
-            qtd_filhos--;
+        }while(populacao_gerada.isEmpty());
+
+        for (int i = 0; i < populacao_gerada.size(); i++) {
+            int [] sun =  Mutacao(populacao_gerada.get(i));
+            if (sun!=null){
+                populacao_gerada.remove(i);
+                populacao_gerada.add(i, sun);
+            }
         }
+        
         return populacao_gerada;
     }
     
-    public int [] Cruzamento(int []pai1, int []pai2, int taxa ){
-        int r = (new Random()).nextInt(taxa+1);
+    public int [] Cruzamento(int []pai1, int []pai2){
+        int r = (new Random()).nextInt(taxa_cruzamento+1);
         
-        if(r<=taxa){
+        if(r<=taxa_cruzamento){
             int [] filho = new int[pai1.length];
             Arrays.fill(filho, -1);
             
@@ -202,9 +198,9 @@ public class AG {
         
     } 
     
-    public int [] Mutacao(int []pai, int taxa){
-        int r = (new Random()).nextInt(taxa+1);
-        if(r<=taxa){
+    public int [] Mutacao(int []pai){
+        int r = (new Random()).nextInt(taxa_mutacao+1);
+        if(r<=taxa_mutacao){
             int indice1;
             int indice2;
             do{
@@ -234,6 +230,10 @@ public class AG {
     } 
     
     public int [][]  GeraPopulacao(){
+        int qtd_elite = (int) Math.floor((float)pop_size*( (float)(taxa_elitismo/100) ) ); //usar floor ao inves de round 
+                                                                                           //pq se a populacao for muito 
+                                                                                           //pequena arredondar por resultar 
+                                                                                           //em 0 individuos na elite
         int [][] population = new int [pop_size][city_amount];
         for(int [] cromossomo:population)
             Arrays.fill(cromossomo, -1);
@@ -255,6 +255,15 @@ public class AG {
             }
             System.out.println("soluc ot: "+solucao_otima);
         }
+        
+        for(int i = 0; i < pop_size; i++){
+            Fitness(populacao[i]);
+            if(qtd_elite>0){
+                
+            }
+            
+        }
+        
         return population;
     }
     
@@ -270,16 +279,17 @@ public class AG {
         return fitness;
     }
     
-    public int[] Torneio(int size){
-        size = (int) (pop_size*( (float)(size/100) ) );
-        if(size%2!=0)
-            size--;
+    public int[] Torneio(){
+        int qtd = (int) ((float)pop_size*( (float)(taxa_selecao/100) ) );
         
-        int [] indice = new int [size];
+        if(qtd%2!=0) //faz a qtd ser par
+            qtd--;
+        
+        int [] indice = new int [qtd];
         Arrays.fill(indice, -1);
         int count = 0;
         int index;
-        while (count<size){
+        while (count<qtd){
             int a1;
             int a2;
             do{
