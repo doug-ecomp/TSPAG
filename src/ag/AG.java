@@ -5,11 +5,11 @@
  */
 package ag;
 
-import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -33,7 +33,6 @@ public class AG {
     private int [][] populacao;
     private ArrayList <Integer> elite;
     private final int geracoes = 10;
-    private int solucao_otima; //Indice da melhor solucao. Atualizado em cada geração;
     private int pop_size;
     private int city_amount;
     
@@ -53,10 +52,11 @@ public class AG {
         
         fitness_values = new float [pop_size];
         Arrays.fill(fitness_values, -1);
+        
         elite = new ArrayList<>();
         
         populacao = GeraPopulacao();
-        solucao_otima = 0;
+        PrimeiraElite();
         
     }
     
@@ -66,9 +66,9 @@ public class AG {
         int geracao = 0;
         
         while(geracao<qtd_geracoes){
-            int [] popolacao_inter = Torneio();
-            ArrayList<int []> filhos =  Reproduzir(popolacao_inter);
-            
+            int [] populacao_inter = Torneio();
+            ArrayList<int []> filhos =  Reproduzir(populacao_inter);
+            Substituicao(filhos);
             
             
        }
@@ -76,23 +76,29 @@ public class AG {
     
     
     public void Substituicao(ArrayList<int []> populacao_gerada){
-        int indice;
-        for(int [] filho: populacao_gerada){
+        int [] indices = new int [populacao_gerada.size()];
+        Arrays.fill(indices, -1);
+        
+        for (int i = 0; i < indices.length; i++) {
+            int ind;
             do{
-                indice = (new Random()).nextInt(pop_size);
-            } while(elite.contains(indice));
-            populacao[indice] = filho;
-            float fitness = Fitness(filho);
-            fitness_values[indice] = fitness;
-            AtualizaElite(indice, fitness);
+                ind = (new Random()).nextInt(pop_size);
+            } while(elite.contains(ind) || VectorContains(indices, ind)!=-1);
+            indices[i] = ind;
         }
         
-        
+        for (int i = 0; i < indices.length; i++) {    
+            populacao[indices[i]] = populacao_gerada.get(i);
+            float fitness = Fitness(populacao_gerada.get(i));
+            fitness_values[indices[i]] = fitness;
+            AtualizaElite(indices[i], fitness);
+        }
     }
+    
     public void AtualizaElite(int indice, float fitness){
-        for (int i = 0; i < elite.size(); i++) {
+        for (int i = elite.size()-1; i >= 0; i--) {
             if(fitness>fitness_values[elite.get(i)]){
-                elite.remove(i);
+                elite.remove(0);
                 elite.add(i, indice);
                 break;
             }  
@@ -102,11 +108,7 @@ public class AG {
     }
     public ArrayList<int []> Reproduzir(int [] pop_inter){
         int [] filho;
-        int qtd_filhos;
-        //a matriz população para uma nova matriz com a quantidade de tamanho da populacao gera (país e filhos gerados)
         ArrayList<int []> populacao_gerada = new ArrayList<>();
-        
-        int indice=0;
         
         do{
             for(int i = 0, j = pop_inter.length-1; i < pop_inter.length/2; i++, j--){
@@ -116,7 +118,7 @@ public class AG {
                     populacao_gerada.add(filho);
                 }
                 else {
-                    System.out.println("Filho com o resultado null");
+                    System.out.println("Filho nao gerado");
                 }
             }
         }while(populacao_gerada.isEmpty());
@@ -146,7 +148,7 @@ public class AG {
                 int aux1;
                 do{
                     aux1 = (new Random()).nextInt(pai1.length);
-                }while(BuscaElemento(genes_do_pai1, pai1[aux1])!=-1);
+                }while(VectorContains(genes_do_pai1, pai1[aux1])!=-1);
                 genes_do_pai1[i] = pai1[aux1];
                 indices_genes_pai1[i] = aux1;
             }
@@ -169,7 +171,7 @@ public class AG {
             }
             
             for (int i = 0; i < genes_do_pai1.length; i++) {
-                indices_no_pai2[i] = BuscaElemento(pai2, genes_do_pai1[i]);
+                indices_no_pai2[i] = VectorContains(pai2, genes_do_pai1[i]);
             }
             
             Arrays.sort(indices_no_pai2);
@@ -183,8 +185,8 @@ public class AG {
             System.out.println("");
             
             for(int i = 0; i < pai2.length; i++){
-                if(BuscaElemento(filho, pai2[i])==-1){
-                    int aux2 = BuscaElemento(filho, -1);
+                if(VectorContains(filho, pai2[i])==-1){
+                    int aux2 = VectorContains(filho, -1);
                     filho[aux2] = pai2[i];
                 }
             }
@@ -221,19 +223,16 @@ public class AG {
         
     }
     
-    public int BuscaElemento(int [] cromossomo, int gene){
-        for(int i = 0; i < cromossomo.length; i++){
-            if(cromossomo[i]==gene)
+    public int VectorContains(int [] vector, int value){
+        for(int i = 0; i < vector.length; i++){
+            if(vector[i]==value)
                 return i;
         }
         return -1;
     } 
     
     public int [][]  GeraPopulacao(){
-        int qtd_elite = (int) Math.floor((float)pop_size*( (float)(taxa_elitismo/100) ) ); //usar floor ao inves de round 
-                                                                                           //pq se a populacao for muito 
-                                                                                           //pequena arredondar por resultar 
-                                                                                           //em 0 individuos na elite
+         
         int [][] population = new int [pop_size][city_amount];
         for(int [] cromossomo:population)
             Arrays.fill(cromossomo, -1);
@@ -243,28 +242,38 @@ public class AG {
                 int gene;
                 do{
                     gene=(new Random()).nextInt(city_amount);
-                } while(BuscaElemento(population[j], gene)!=-1);
+                } while(VectorContains(population[j], gene)!=-1);
                 population[j][i] = gene;
-                System.out.print(gene+" ");
             }
             fitness_values[j] = Fitness(population[j]);
-            System.out.print(j+" fit: "+fitness_values[j]+"   ");
-            if(fitness_values[j]>fitness_values[solucao_otima]){
-                solucao_otima = j;
-                System.out.print(j+" ");
-            }
-            System.out.println("soluc ot: "+solucao_otima);
-        }
-        
-        for(int i = 0; i < pop_size; i++){
-            Fitness(populacao[i]);
-            if(qtd_elite>0){
-                
-            }
             
         }
         
         return population;
+    }
+    
+    public void PrimeiraElite(){
+        /*usar ceiling ao inves de round 
+        pq se a populacao for muito 
+        pequena arredondar por resultar 
+        em 0 individuos na elite*/
+        int qtd_elite = (int) Math.ceil((float)pop_size*( (float)((float)taxa_elitismo/100f) ) );
+        elite.add(0);
+        for (int i = 1; i < qtd_elite; i++) {
+            int j;
+            for (j = elite.size()-1; j >= 0; j--) {
+                if(fitness_values[i]>fitness_values[elite.get(j)]){
+                    elite.add(j+1, i);
+                    break;
+                }
+            }
+            if(j==-1)
+                elite.add(0, i);
+        }
+        
+        for (int i = qtd_elite; i < pop_size; i++) {
+            AtualizaElite(i, fitness_values[i]);
+        }
     }
     
     public float Fitness (int [] cromossomo){
@@ -301,7 +310,7 @@ public class AG {
                 index = a1;
             else
                 index = a2;
-            if(BuscaElemento(indice, index)==-1){
+            if(VectorContains(indice, index)==-1){
                 indice[count] = index;
                 count++;
             }
